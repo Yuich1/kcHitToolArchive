@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-158949689-2"></script>
+  <script>
+    /*
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+
+    gtag("config", "UA-158949689-2");
+    */
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>艦これ砲撃支援命中計算機</title>
+  <meta name="title" content="艦これ砲撃支援命中計算機" />
+  <meta
+    name="description"
+    content="艦これの砲撃支援を計算できるサイトです。命中率、撃破率、命中時撃破率などの計算が行えます。"
+  />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+  <link rel="shortcut icon" href="./images/icon/favicon.ico" />
+  <!--  css更新時はverを変更する  -->
+  <link rel="stylesheet" href="./css/style.min.css?ver=1.3.3.4" />
+  <script type="text/javascript" src="./js/ncmb.min.js" charset="utf-8"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script defer src="./js/common.min.js?ver=1.3.0.0"></script>
+  <script defer src="./js/data.min.js?ver=1.3.2.8"></script>
+  <script defer src="./js/main.min.js?ver=1.3.3.7"></script>
+  <script type="module" src="./js/game.js?ver=1.3.0.0"></script>
+</head>
+
+<body>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">艦これ砲撃支援命中計算機 v1.3.3</h1>
+    </header>
+    <div class="wrapper">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="myfleet box">
+            <div class="box-header">
+              <ul class="nav nav-tabs">
+                <li>
+                  <h2 class="myfleet-title">艦娘</h2>
+                </li>
+                <li class="fleet-select active"><a href="#">1</a></li>
+                <li class="fleet-select"><a href="#">2</a></li>
+                <li class="fleet-select"><a href="#">3</a></li>
+                <li class="fleet-select"><a href="#">4</a></li>
+                <li class="fleet-select"><a href="#">5</a></li>
+                <li class="fleet-select"><a href="#">6</a></li>
+              </ul>
+            </div>
+            <p class="fleet-name" id="myfleet-name" data-toggle="modal" data-target="#select-myfleet">未選択</p>
+            <br />
+            <img
+              class="fleet-img"
+              id="myfleet-img"
+              src="./images/ships/0.png"
+              alt="艦娘"
+              data-toggle="modal"
+              data-target="#select-myfleet"
+            />
+            <span>Lv</span>
+            <input type="number" class="form-control inline-b lv" placeholder="入力" />
+            <span>運</span>
+            <input
+              type="number"
+              class="form-control inline-b luck"
+              placeholder="入力"
+              onsubmit="doSomething();return false;"
+            />
+            <button
+              type="button"
+              class="btn btn-info"
+              id="create-myfleet"
+              data-toggle="modal"
+              data-target="#select-myfleet"
+            >
+              艦娘を選ぶ
+            </button>
+            <table class="status">
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="hasTooltip" data-toggle="tooltip" data-placement="right" title="火力 + 4(支援艦隊定数)">
+                      支援火力
+                    </div>
+                  </td>
+                  <td class="power"></td>
+                  <td>装備命中</td>
+                  <td class="accuracy"></td>
+                  <td>
+                    <button type="button" class="btn btn-default btn-sm no-kira" id="kira">キラを付ける</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table class="items">
+              <tbody></tbody>
+            </table>
+            <table class="additional-item">
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="enemy box">
+            <h2 class="box-title">敵艦船</h2>
+            <p class="fleet-name" id="enemy-name" data-toggle="modal" data-target="#select-enemy">ツ級 elite</p>
+            <br />
+            <img
+              class="fleet-img"
+              id="enemy-img"
+              src="./images/ships/1592.png"
+              alt="深海棲艦"
+              data-toggle="modal"
+              data-target="#select-enemy"
+            />
+            <p id="unknown-status"></p>
+            <button
+              type="button"
+              class="btn btn-info"
+              id="create-enemy"
+              data-toggle="modal"
+              data-target="#select-enemy"
+            >
+              敵艦船を選ぶ
+            </button>
+            <table class="status" data-toggle="tooltip" title="任意のステータスを設定可能">
+              <tbody>
+                <tr>
+                  <td>耐久</td>
+                  <td>
+                    <input type="number" class="form-control enemy-status hp" value="66" />
+                  </td>
+                  <td>装甲</td>
+                  <td>
+                    <input type="number" class="form-control enemy-status armor" value="68" />
+                  </td>
+                  <td>回避</td>
+                  <td>
+                    <input type="number" class="form-control enemy-status avoidance" value="74" />
+                  </td>
+                  <td>運</td>
+                  <td>
+                    <input type="number" class="form-control enemy-status luck" value="66" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="saved-info">
+              <button type="button" class="btn btn-info status-reset">初期値に戻す</button>
+            </div>
+          </div>
+          <div class="setup box">
+            <h2 class="box-title">設定</h2>
+            <table>
+              <tbody>
+                <tr>
+                  <td>味方陣形</td>
+                  <td>
+                    <div class="form-group">
+                      <select class="form-control my-formation" name="formation">
+                        <option value="0">単縦陣</option>
+                        <option value="1">複縦陣</option>
+                        <option value="2">輪形陣</option>
+                        <option value="3">梯形陣</option>
+                        <option value="4">単横陣</option>
+                        <option value="5">警戒陣</option>
+                      </select>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="hasTooltip" data-toggle="tooltip" title="CL1:通常, CL2:クリティカル, 自動:CL2率を計算">
+                      クリティカル
+                    </div>
+                  </td>
+                  <td>
+                    <div class="form-group">
+                      <select class="form-control critical" name="critical">
+                        <option value="1">CL1</option>
+                        <option value="2">CL2</option>
+                        <option value="3" selected>自動</option>
+                      </select>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>敵陣形</td>
+                  <td>
+                    <div class="form-group">
+                      <select class="form-control enemy-formation" name="formation">
+                        <option value="0">単縦陣</option>
+                        <option value="1">複縦陣</option>
+                        <option value="2">輪形陣</option>
+                        <option value="3">梯形陣</option>
+                        <option value="4">単横陣</option>
+                        <option value="5">警戒陣</option>
+                      </select>
+                    </div>
+                  </td>
+                  <td></td>
+                  <td>
+                    <button type="button" class="btn btn-info share" data-toggle="modal" data-target="#share">
+                      共有
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>交戦形態</td>
+                  <td>
+                    <div class="form-group">
+                      <select class="form-control engagement" name="engagement">
+                        <option value="1.2">T字有利</option>
+                        <option value="1.0" selected>同航</option>
+                        <option value="0.8">反航</option>
+                        <option value="0.6">T字不利</option>
+                        <option value="1.2,1.0,0.8,0.6">自動</option>
+                      </select>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="saiunSet"></div>
+                  </td>
+                  <td>
+                    <button type="button" class="btn btn-info save-fleet" data-toggle="modal" data-target="#save-fleet">
+                      編成記録
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="result box box">
+            <h2 class="box-title">計算結果</h2>
+            <!--<div class="background-img"></div>-->
+            <div class="progress">
+              <div class="progress-bar progress-bar-miss" role="progressbar" style="width: 0%">miss</div>
+              <div class="progress-bar progress-bar-fine" role="progressbar" style="width: 0%">小破未満</div>
+              <div class="progress-bar progress-bar-shoha" role="progressbar" style="width: 0%">小破</div>
+              <div class="progress-bar progress-bar-tyuha" role="progressbar" style="width: 0%">中破</div>
+              <div class="progress-bar progress-bar-taiha" role="progressbar" style="width: 0%">大破</div>
+              <div class="progress-bar progress-bar-sink" role="progressbar" style="width: 0%">撃沈</div>
+            </div>
+            <p class="box-title">詳細</p>
+            <div class="grid-result">
+              <div class="result-left"></div>
+              <div class="result-right"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="description">
+      <h2 class="title">開発状況</h2>
+      <p>
+        更新情報は<a href="https://twitter.com/2qrbgxpsaWEziml?s=20" target="_blank">こちらのtwitterから。</a><br />
+        不具合/要望は<a href="https://peing.net/ja/2qrbgxpsaweziml?event=0" target="_blank"
+          >こちらの質問箱へお願いします。</a
+        ><br />
+      </p>
+      <details>
+        <summary>更新情報</summary>
+        v1.1.0 装備ボーナスを反映しました。<br />
+        v1.1.1 駆逐実装しました<br />
+        v1.1.2 装備解除ボタン、補強増設の装備制限、命中率計算式の修正、撃破率計算式の修正をしました。<br />
+        v1.1.3 比叡改二丙を追加、金剛改二丙ステータス上昇、装備ボーナスの可視化、熟練見張員に装備ボーナスを追加。<br />
+        v1.1.4 クリティカル発生率を考慮したダメージ計算を追加。<del>注：乱数によりダメージには振れ幅が生じます。</del
+        ><br />
+        v1.1.5
+        軽巡・軽巡関連装備ボーナスを追加。算出法を変更し、クリティカル自動時の乱数による結果のブレを無くしました。<br />
+        v1.1.6 艦娘・装備の検索機能を追加。<br />
+        v1.2.0 デッキビルダー形式の出力に対応。艦娘を6隻まで選択可能にしました。<br />
+        v1.2.1 補助艦艇を追加しました。<br />
+        v1.2.2 命中込み撃破率を詳細でも表示するように変更しました。資材消費を追加しました。<br />
+        v1.2.3 Fletcher改Mod.2, Mk.IIを追加。海外レーダーの装備ボーナスを追加しました。<br />
+        v1.2.4 4月作戦ランカー報酬を追加。改修値による装備ボーナス変化を反映。<br />
+        v1.2.5 敵艦のステータスを設定可能にしました。<br />
+        v1.2.6 2020梅雨イベの艦娘と装備を追加しました。 <br />
+        v1.2.7 敵艦船の回避、運を次回以降も保持するよう変更しました。変更後ステータスはリセットも可能です。<br />
+        v1.2.8 加賀改二、回転翼機を実装。艦偵の改修による装備ボーナスを追加しました。<br />
+        v1.2.9 編成記録を追加しました。<br />
+        v1.3.0 装備ボーナスを可視化、イベント用の空の敵艦を追加しました。<br />
+        v1.3.1 艦娘選択時に適切な装備タブを表示するよう変更しました。 <br />
+        v1.3.2 敵艦の耐久、装甲も保存するように変更しました<br />
+        v1.3.3 デッキビルダー形式の読み込み時、複数艦隊から読み込む編成を選択可能になりました。<br />
+      </details>
+
+      <h2 class="title">知的財産権</h2>
+      <p>
+        当サイトは著作権法第32条に基づき画像を引用しており、画像の著作権は権利者様(<a
+          href="http://www.dmm.com/netgame/feature/kancolle.html"
+          target="_blank"
+          >艦隊これくしょん</a
+        >)に帰属します。<br />
+        また、権利者様側からの削除依頼や警告は速やかに対処いたします。
+      </p>
+      <h2 class="title">免責事項</h2>
+      <p>
+        当サイトでは推定式を多く使用しているため、計算結果の正確性については保障いたしかねます。<br />
+        また、当サイトの利用によって発生した損害について一切の責任を負いません。
+      </p>
+    </div>
+  </div>
+  <!-- Modal content -->
+  <div id="select-myfleet" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">艦娘選択</h4>
+          <div class="search">
+            検索
+            <input type="text" class="form-control search-fleet" name="name" size="20" autocomplete="off" />
+          </div>
+        </div>
+        <div class="modal-body">
+          <ul class="nav nav-tabs">
+            <li class="active">
+              <a class="focus-fleet" data-toggle="tab" href="#bb" id="bb-tab">戦艦</a>
+            </li>
+            <li>
+              <a class="focus-fleet" data-toggle="tab" href="#cv" id="cv-tab">航空母艦</a>
+            </li>
+            <li>
+              <a class="focus-fleet" data-toggle="tab" href="#ca" id="ca-tab">重巡</a>
+            </li>
+            <li>
+              <a class="focus-fleet" data-toggle="tab" href="#cl" id="cl-tab">軽巡</a>
+            </li>
+            <li>
+              <a class="focus-fleet" data-toggle="tab" href="#dd" id="dd-tab">駆逐</a>
+            </li>
+            <li>
+              <a class="focus-fleet" data-toggle="tab" href="#av" id="av-tab">補助艦艇</a>
+            </li>
+          </ul>
+          <div class="tab-content fleet-list">
+            <div id="bb" class="tab-pane fade in active table-wrapper">
+              <table class="table">
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="cv" class="tab-pane fade table-wrapper">
+              <table class="table">
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="ca" class="tab-pane fade table-wrapper">
+              <table class="table">
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="cl" class="tab-pane fade table-wrapper">
+              <table class="table">
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="dd" class="tab-pane fade table-wrapper">
+              <table class="table">
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="av" class="tab-pane fade table-wrapper">
+              <table class="table">
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="select-enemy" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">敵艦船選択</h4>
+        </div>
+        <div class="modal-body">
+          <ul class="nav nav-tabs">
+            <li class="active">
+              <a data-toggle="tab" href="#bb-enemy" id="bb-tab-enemy">戦艦</a>
+            </li>
+            <li>
+              <a data-toggle="tab" href="#cv-enemy" id="cv-tab-enemy">航空母艦</a>
+            </li>
+            <li>
+              <a data-toggle="tab" href="#ca-enemy" id="ca-tab-enemy">重巡</a>
+            </li>
+            <li>
+              <a data-toggle="tab" href="#cl-enemy" id="cl-tab-enemy">軽巡</a>
+            </li>
+            <li>
+              <a data-toggle="tab" href="#dd-enemy" id="dd-tab-enemy">駆逐</a>
+            </li>
+            <li>
+              <a data-toggle="tab" href="#av-enemy" id="av-tab-enemy">補助艦艇</a>
+            </li>
+            <li>
+              <a data-toggle="tab" href="#event-enemy" id="event-tab-enemy">イベント</a>
+            </li>
+          </ul>
+          <div class="tab-content fleet-list">
+            <div id="bb-enemy" class="tab-pane fade in active table-wrapper">
+              <table class="table">
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="cv-enemy" class="tab-pane fade table-wrapper">
+              <table class="table">
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="ca-enemy" class="tab-pane fade table-wrapper">
+              <table class="table">
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="cl-enemy" class="tab-pane fade table-wrapper">
+              <table class="table">
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="dd-enemy" class="tab-pane fade table-wrapper">
+              <table class="table">
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="av-enemy" class="tab-pane fade table-wrapper">
+              <table class="table">
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="event-enemy" class="tab-pane fade table-wrapper">
+              <table class="table">
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="select-myitem" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">装備選択</h4>
+          <div class="search">
+            検索
+            <input type="text" class="form-control search-item" name="name" size="20" autocomplete="off" />
+          </div>
+        </div>
+        <div class="modal-body">
+          <ul class="nav nav-tabs">
+            <li class="active">
+              <a class="focus-item" data-toggle="tab" href="#gun" id="gun-tab">主砲</a>
+            </li>
+            <li>
+              <a class="focus-item" data-toggle="tab" href="#secondaly-gun" id="secondaly-gun-tab">副砲</a>
+            </li>
+            <li>
+              <a class="focus-item" data-toggle="tab" href="#plane" id="plane-tab">艦載機</a>
+            </li>
+            <li>
+              <a class="focus-item" data-toggle="tab" href="#radar" id="radar-tab">電探</a>
+            </li>
+            <li>
+              <a class="focus-item" data-toggle="tab" href="#other" id="other-tab">その他</a>
+            </li>
+          </ul>
+          <div class="tab-content item-list">
+            <div id="gun" class="tab-pane fade in active">
+              <ul class="nav nav-tabs">
+                <li class="active">
+                  <a class="focus-item" data-toggle="tab" href="#l-gun" id="l-gun-tab">大口径</a>
+                </li>
+                <li>
+                  <a class="focus-item" data-toggle="tab" href="#m-gun" id="m-gun-tab">中口径</a>
+                </li>
+                <li>
+                  <a class="focus-item" data-toggle="tab" href="#s-gun" id="s-gun-tab">小口径</a>
+                </li>
+              </ul>
+              <div class="tab-content item-list">
+                <div id="l-gun" class="tab-pane fade in active table-wrapper">
+                  <table class="table">
+                    <tbody></tbody>
+                  </table>
+                </div>
+                <div id="m-gun" class="tab-pane fade table-wrapper">
+                  <table class="table">
+                    <tbody></tbody>
+                  </table>
+                </div>
+                <div id="s-gun" class="tab-pane fade table-wrapper">
+                  <table class="table">
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div id="secondaly-gun" class="tab-pane fade table-wrapper">
+              <table class="table">
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="plane" class="tab-pane fade">
+              <ul class="nav nav-tabs">
+                <li class="active">
+                  <a class="focus-item" data-toggle="tab" href="#attacker" id="attacker-tab">艦攻</a>
+                </li>
+                <li>
+                  <a class="focus-item" data-toggle="tab" href="#bomber" id="bomber-tab">艦爆</a>
+                </li>
+                <li>
+                  <a class="focus-item" data-toggle="tab" href="#scout" id="scout-tab">艦偵</a>
+                </li>
+                <li>
+                  <a class="focus-item" data-toggle="tab" href="#heli" id="heli-tab">回転翼</a>
+                </li>
+                <li>
+                  <a class="focus-item" data-toggle="tab" href="#interceptor" id="interceptor-tab">局戦</a>
+                </li>
+              </ul>
+              <div class="tab-content item-list">
+                <div id="attacker" class="tab-pane fade in active table-wrapper">
+                  <table class="table">
+                    <tbody></tbody>
+                  </table>
+                </div>
+                <div id="bomber" class="tab-pane fade table-wrapper">
+                  <table class="table">
+                    <tbody></tbody>
+                  </table>
+                </div>
+                <div id="scout" class="tab-pane fade table-wrapper">
+                  <table class="table">
+                    <tbody></tbody>
+                  </table>
+                </div>
+                <div id="heli" class="tab-pane fade table-wrapper">
+                  <table class="table">
+                    <tbody></tbody>
+                  </table>
+                </div>
+                <div id="interceptor" class="tab-pane fade table-wrapper">
+                  <table class="table">
+                    <tbody>
+                      <tr>
+                        <button
+                          type="button"
+                          class="btn btn-default item"
+                          data-toggle="modal"
+                          data-target="#game"
+                          id="startButton"
+                        >
+                          秋水
+                        </button>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div id="radar" class="tab-pane fade table-wrapper">
+              <table class="table">
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="other" class="tab-pane fade table-wrapper">
+              <table class="table">
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="share" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">共有</h4>
+        </div>
+        <div class="modal-body">
+          <div>コードを入力して編成を展開できます</div>
+          <input type="text" class="form-control inline-b deck" width="60px" />
+          <button class="btn btn-info deckBuilder">デッキビルダー形式をコピー</button>
+          <!--<button class="btn btn-info deckImageOpen">艦これ編成画像出力で開く</button>-->
+          <button class="btn btn-info deckBuilderOpen">デッキビルダーで開く</button>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="save-fleet" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">編成記録</h4>
+        </div>
+        <div class="modal-body">
+          <div class="save">
+            <button class="btn btn-info save-fleet-button" data-toggle="modal" data-target="#save-form">
+              + 編成を保存
+            </button>
+          </div>
+          <div class="saved-fleetlist table-wrapper">
+            <table class="table">
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="save-form" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">編成を保存</h4>
+        </div>
+        <div class="modal-body">
+          <div class="fleet-name">
+            編成名
+            <input type="text" class="form-control fleet-name" size="30" autocomplete="off" />
+          </div>
+          <div class="fleet-banners"></div>
+          <button class="btn btn-info" id="save-fleet-button" data-toggle="modal" data-target="#save-form">
+            編成を保存
+          </button>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="delete-check" class="modal fade" data-keybord="false" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body center">
+          削除した編成は復元できません。<br />
+          <button class="btn btn-danger" id="delete-fleet" data-dismiss="modal">削除</button>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="select-deckbuilder" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">展開する編成を選択</h4>
+        </div>
+        <div class="modal-body">
+          <div class="select-fleetlist table-wrapper">
+            <table class="table">
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="game" class="modal fade" data-keybord="false" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="gameView"></div>
+          <input
+            type="text"
+            class="form-control"
+            id="ranking-name"
+            name="name"
+            size="16"
+            autocomplete="off"
+            style="position: absolute; top: 320px; left: 46px; width: inherit"
+          />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    $(document).ready(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+  </script>
+</body>

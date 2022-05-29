@@ -1,0 +1,4 @@
+SetEnvIf Referer "^https://yuich1.github.io/kcHitTool/" mysite
+Order Deny,Allow
+Deny from all
+Allow from env=mysite
